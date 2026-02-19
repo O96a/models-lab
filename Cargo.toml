@@ -1,0 +1,57 @@
+[workspace]
+resolver = "2"
+members = [
+    "models-core",
+    "models-ollama",
+    "models-api",
+    "models-cli",
+    "models-workflow",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Models Lab Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/models-lab/models-lab"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.41", features = ["full"] }
+tokio-stream = "0.1"
+futures = "0.3"
+
+# HTTP
+axum = { version = "0.7", features = ["macros"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["trace", "cors"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+reqwest-eventsource = "0.6"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# IDs and time
+uuid = { version = "1.11", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+metrics = "0.23"
+metrics-exporter-prometheus = "0.15"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# Async traits
+async-trait = "0.1"
+
+# Internal crates
+models-core = { path = "models-core" }
+models-ollama = { path = "models-ollama" }

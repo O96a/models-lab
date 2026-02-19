@@ -1,0 +1,24 @@
+[package]
+name = "models-workflow"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Workflow engine for Models Lab"
+
+[dependencies]
+tokio = { workspace = true }
+futures = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+models-core = { workspace = true }
+models-ollama = { workspace = true }
+
+[dev-dependencies]
+tokio-test = "0.4"

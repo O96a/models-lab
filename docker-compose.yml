@@ -1,0 +1,159 @@
+version: '3.9'
+
+services:
+  # ============================================================================
+  # LLM Lab API Server
+  # ============================================================================
+  models-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: models-api
+    ports:
+      - "8080:8080"
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - RUST_LOG=info
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - models-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================================================
+  # Ollama - Local LLM Inference
+  # ============================================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - models-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Ollama with GPU support (use: docker-compose --profile gpu up)
+  ollama-gpu:
+    image: ollama/ollama:latest
+    container_name: ollama-gpu
+    profiles:
+      - gpu
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - models-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # PostgreSQL - Persistence
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: models-postgres
+    environment:
+      POSTGRES_DB: llm_lab
+      POSTGRES_USER: llm
+      POSTGRES_PASSWORD: llm_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - models-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U llm -d llm_lab"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # Prometheus - Metrics Collection
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: models-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - models-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # Grafana - Metrics Visualization
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: models-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - models-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # ============================================================================
+  # Redis - Caching
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: models-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - models-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  models-network:
+    driver: bridge
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  ollama-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+  redis-data:
