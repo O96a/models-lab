@@ -1,19 +1,46 @@
-# LLM Lab Configuration
+# Models Lab Configuration
 
 [server]
 host = "0.0.0.0"
 port = 8080
 log_level = "info"
 
-[ollama]
+# Default Ollama provider configuration
+[providers.ollama]
+type = "ollama"
 base_url = "http://localhost:11434"
 timeout_seconds = 120
 default_model = "llama3.2"
-default_embedding_model = "nomic-embed-text"
 
+# OpenAI provider configuration (optional)
+[providers.openai]
+type = "openai"
+# api_key = "sk-..."  # Set via environment variable OPENAI_API_KEY
+default_model = "gpt-4o-mini"
+timeout_seconds = 120
+
+# Evaluation configuration
+[evaluation]
+default_temperature = 0.0
+default_max_tokens = 1024
+default_seed = 42
+default_num_few_shot = 5
+
+# Benchmark configuration
+[benchmarks]
+data_directory = "./datasets"
+cache_directory = "./.cache/benchmarks"
+
+# Database configuration
 [database]
-url = "postgres://llm:llm_secret@localhost:5432/llm_lab"
+url = "postgres://models:models_secret@localhost:5432/models_lab"
 max_connections = 10
 
+# Redis configuration
 [redis]
 url = "redis://localhost:6379"
+
+# Logging configuration
+[logging]
+level = "info"
+format = "json"
