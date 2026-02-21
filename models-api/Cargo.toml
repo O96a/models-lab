@@ -23,6 +23,8 @@ metrics = { workspace = true }
 metrics-exporter-prometheus = { workspace = true }
 models-core = { workspace = true }
 models-ollama = { workspace = true }
+models-providers = { path = "../models-providers" }
+models-benchmark = { path = "../models-benchmark" }
 clap = { workspace = true }
 
 [dev-dependencies]

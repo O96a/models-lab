@@ -1,6 +1,5 @@
 //! LLM API Server
 
-use axum::routing::get;
 use models_api::create_router;
 use models_core::Config;
 use std::sync::Arc;
