@@ -1170,6 +1170,16 @@ dependencies = [
 [[package]]
 name = "models-benchmark"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "futures",
+ "models-core",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "models-cli"
@@ -1194,9 +1204,11 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
+ "futures",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
+ "tokio",
  "tokio-test",
  "tracing",
  "uuid",
@@ -1205,6 +1217,12 @@ dependencies = [
 [[package]]
 name = "models-metrics"
 version = "0.1.0"
+dependencies = [
+ "models-core",
+ "serde",
+ "serde_json",
+ "tracing",
+]
 
 [[package]]
 name = "models-ollama"
@@ -1228,6 +1246,18 @@ dependencies = [
 [[package]]
 name = "models-providers"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures",
+ "models-core",
+ "models-ollama",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "models-storage"
