@@ -13,9 +13,10 @@ pub enum DatasetSplit {
     Test,
 }
 
-/// Dataset entity
+/// Dataset entity (represents a dataset record in the database)
+/// Renamed from `Dataset` to avoid collision with the benchmark framework's `Dataset` type.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Dataset {
+pub struct DatasetEntity {
     pub id: Uuid,
     pub name: String,
     pub description: Option<String>,
@@ -24,7 +25,7 @@ pub struct Dataset {
     pub updated_at: DateTime<Utc>,
 }
 
-impl Dataset {
+impl DatasetEntity {
     pub fn new(name: impl Into<String>) -> Self {
         let now = Utc::now();
         Self {

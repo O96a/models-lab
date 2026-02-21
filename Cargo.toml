@@ -5,6 +5,10 @@ members = [
     "models-ollama",
     "models-api",
     "models-cli",
+    "models-providers",
+    "models-benchmark",
+    "models-metrics",
+    "models-storage",
     "models-workflow",
 ]
 
@@ -52,6 +56,17 @@ clap = { version = "4.5", features = ["derive", "env"] }
 # Async traits
 async-trait = "0.1"
 
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "uuid", "chrono", "json"] }
+
+# Utilities
+maplit = "1.0"
+pin-project = "1.1"
+
 # Internal crates
 models-core = { path = "models-core" }
 models-ollama = { path = "models-ollama" }
+models-providers = { path = "models-providers" }
+models-benchmark = { path = "models-benchmark" }
+models-metrics = { path = "models-metrics" }
+models-storage = { path = "models-storage" }

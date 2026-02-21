@@ -4,9 +4,9 @@ mod model;
 mod experiment;
 mod dataset;
 
-pub use model::{Model, ModelProvider, ModelStatus};
+pub use model::{Model, ProviderKind, ModelStatus};
 pub use experiment::{Experiment, ExperimentStatus, ExperimentConfig};
-pub use dataset::{Dataset, DatasetSplit};
+pub use dataset::{DatasetEntity, DatasetSplit};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

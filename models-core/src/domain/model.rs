@@ -4,12 +4,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::Entity;
-
-/// Model provider
+/// Model provider kind (enum variant)
+/// Renamed from `ModelProvider` to avoid collision with the `ModelProvider` trait
+/// in the providers module.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum ModelProvider {
+pub enum ProviderKind {
     Ollama,
     OpenAI,
     Anthropic,
@@ -18,7 +18,7 @@ pub enum ModelProvider {
     Local,
 }
 
-impl Default for ModelProvider {
+impl Default for ProviderKind {
     fn default() -> Self {
         Self::Ollama
     }
@@ -39,7 +39,7 @@ pub enum ModelStatus {
 pub struct Model {
     pub id: Uuid,
     pub name: String,
-    pub provider: ModelProvider,
+    pub provider: ProviderKind,
     pub status: ModelStatus,
     pub size_bytes: Option<u64>,
     pub parameters: Option<String>,
@@ -49,7 +49,7 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(name: impl Into<String>, provider: ModelProvider) -> Self {
+    pub fn new(name: impl Into<String>, provider: ProviderKind) -> Self {
         let now = Utc::now();
         Self {
             id: Uuid::new_v4(),
