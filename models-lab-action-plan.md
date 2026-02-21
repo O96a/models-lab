@@ -1,7 +1,20 @@
 # Models Lab Enhancement — Action Plan
 
-**Created:** 2026-02-21  
+**Created:** 2026-02-21
+**Last Updated:** 2026-02-21
 **Purpose:** Detailed, phased checklist for a coding agent to implement the enhancements described in `model-lab-enhancment.md` on top of the existing codebase.
+
+---
+
+## Progress Summary
+
+| Phase | Status | Progress |
+|---|---|---|
+| Prerequisites | ✅ Complete | 3/4 (Ollama model pending) |
+| Phase 1 | 🔄 In Progress | 4/12 sections started |
+| Phase 2 | ⏳ Pending | 0/6 |
+| Phase 3 | ⏳ Pending | 0/6 |
+| Phase 4 | ⏳ Pending | 0/5 |
 
 ---
 
@@ -73,9 +86,9 @@
 
 ### Prerequisites
 
-- [ ] Ensure Rust 1.75+ is installed
-- [ ] Ensure Docker + Docker Compose are available
-- [ ] Ensure PostgreSQL 16, Redis 7 accessible (via docker-compose or local)
+- [x] Ensure Rust 1.75+ is installed ✅ **Done** (Rust 1.93.1 installed on 2026-02-21)
+- [x] Ensure Docker + Docker Compose are available ✅ **Done** (Docker 29.1.5, Docker Compose 5.0.1)
+- [x] Ensure PostgreSQL 16, Redis 7 accessible (via docker-compose or local) ✅ **Done** (PostgreSQL and Redis containers running)
 - [ ] Pull at least one Ollama model for testing (e.g., `llama3.2:3b`)
 
 ---
@@ -88,13 +101,13 @@
 
 #### 1.1 Workspace Restructure
 
-- [ ] Add new workspace members to root `Cargo.toml`:
+- [x] Add new workspace members to root `Cargo.toml`: ✅ **Done** (2026-02-21)
   - `models-providers` — provider adapters
   - `models-benchmark` — benchmark framework
   - `models-metrics` — metrics calculations
   - `models-storage` — persistence layer
-- [ ] Create directory scaffolding for each new crate (`cargo init --lib`)
-- [ ] Add shared workspace dependencies: `sqlx` (postgres, runtime-tokio), `maplit`, `pin-project`
+- [x] Create directory scaffolding for each new crate (`cargo init --lib`) ✅ **Done** (2026-02-21)
+- [x] Add shared workspace dependencies: `sqlx` (postgres, runtime-tokio), `maplit`, `pin-project` ✅ **Done** (2026-02-21)
 - [ ] Fix Dockerfile crate paths from `llm-*` to `models-*` (lines 8–12, 15–19, 25–29)
 
 #### 1.2 Universal Provider Trait (`models-core`)
@@ -109,9 +122,9 @@
   - `ProviderType` tagged enum (Ollama, VLLM, OpenAI, Anthropic, etc.)
   - `ProviderFactory` struct with `create()` method
   - `ApiFormat` enum
-- [ ] Rename existing `ModelProvider` enum in `domain/model.rs` to `ProviderKind`
+- [x] Rename existing `ModelProvider` enum in `domain/model.rs` to `ProviderKind` ✅ **Done** (2026-02-21)
   - Update all references in `domain/mod.rs`, `model.rs`, and downstream
-- [ ] Rename existing `Dataset` in `domain/dataset.rs` to `DatasetEntity`
+- [x] Rename existing `Dataset` in `domain/dataset.rs` to `DatasetEntity` ✅ **Done** (2026-02-21)
   - Update references in `domain/mod.rs`
 - [ ] Add `pub mod providers;` to `models-core/src/lib.rs`
 - [ ] Re-export key types from `lib.rs`
