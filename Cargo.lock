@@ -1186,9 +1186,12 @@ name = "models-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "clap",
+ "models-benchmark",
  "models-core",
  "models-ollama",
+ "models-providers",
  "serde",
  "serde_json",
  "thiserror 2.0.18",

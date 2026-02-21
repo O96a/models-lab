@@ -7,7 +7,7 @@ license.workspace = true
 description = "CLI tool for Models Lab"
 
 [[bin]]
-name = "llm"
+name = "models"
 path = "src/main.rs"
 
 [dependencies]
@@ -19,5 +19,8 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
 models-core = { workspace = true }
 models-ollama = { workspace = true }
+models-providers = { path = "../models-providers" }
+models-benchmark = { path = "../models-benchmark" }
