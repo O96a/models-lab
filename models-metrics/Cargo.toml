@@ -5,5 +5,10 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Metrics engine for Models Lab"
 
 [dependencies]
+models-core = { path = "../models-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
