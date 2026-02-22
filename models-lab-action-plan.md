@@ -1,7 +1,7 @@
 # Models Lab Enhancement — Action Plan
 
 **Created:** 2026-02-21
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-22
 **Purpose:** Detailed, phased checklist for a coding agent to implement the enhancements described in `model-lab-enhancment.md` on top of the existing codebase.
 
 ---
@@ -10,9 +10,9 @@
 
 | Phase | Status | Progress |
 |---|---|---|
-| Prerequisites | ✅ Complete | 3/4 (Ollama model pending) |
-| Phase 1 | ✅ Complete | 11/12 sections done (PostgreSQL pending) |
-| Phase 2 | ⏳ Pending | 0/6 |
+| Prerequisites | ✅ Complete | 4/4 (cloud models in use) |
+| Phase 1 | ✅ Complete | 12/12 sections done |
+| Phase 2 | ⏳ In Progress | 4/6 (providers, benchmarks, metrics done) |
 | Phase 3 | ⏳ Pending | 0/6 |
 | Phase 4 | ⏳ Pending | 0/5 |
 
@@ -89,7 +89,7 @@
 - [x] Ensure Rust 1.75+ is installed ✅ **Done** (Rust 1.93.1 installed on 2026-02-21)
 - [x] Ensure Docker + Docker Compose are available ✅ **Done** (Docker 29.1.5, Docker Compose 5.0.1)
 - [x] Ensure PostgreSQL 16, Redis 7 accessible (via docker-compose or local) ✅ **Done** (PostgreSQL and Redis containers running)
-- [ ] Pull at least one Ollama model for testing (e.g., `llama3.2:3b`)
+- [x] Ensure Ollama models available for testing ✅ **Done** (2026-02-22) — Using cloud models: `glm-5:cloud`, `qwen3.5:cloud`, `minimax-m2.5:cloud`, `glm-4.7:cloud`, `kimi-k2.5:cloud`, `gpt-oss:20b-cloud`, `gpt-oss:120b-cloud`
 
 ---
 
@@ -152,14 +152,17 @@
 
 #### 1.5 Database Migrations + Storage Layer (`models-storage`)
 
-- [ ] Create `migrations/001_initial_schema.sql`: **Deferred to Phase 2**
+- [x] Create `migrations/001_initial_schema.sql`: ✅ **Done** (2026-02-22)
   - `evaluation_reports` table
   - `benchmark_results` table
   - `sample_results` table
   - `provider_configs` table
-  - Use proper PostgreSQL `CREATE INDEX` statements (not inline INDEX)
-- [ ] Create `models-storage/src/lib.rs` with `EvaluationStorage` trait
-- [ ] Create `models-storage/src/postgres.rs` with `PostgresStorage` implementation
+  - `model_comparisons` table
+  - `benchmark_metadata` table
+  - `audit_log` table
+  - Uses proper PostgreSQL `CREATE INDEX` statements
+- [x] Create `models-storage/src/lib.rs` with re-exports ✅ **Done** (2026-02-22)
+- [x] Create `models-storage/src/postgres.rs` with `PostgresStorage` implementation ✅ **Done** (2026-02-22)
 - [x] Create `EvaluationStorage` async trait in `models-core/src/storage/mod.rs`: ✅ **Done** (2026-02-21)
   - `save_benchmark_result`, `save_evaluation_report`, `get_evaluation_report`, `list_evaluation_reports`, `get_benchmark_history`
   - `InMemoryStorage` implementation for testing
@@ -260,39 +263,39 @@
 
 #### 2.1 Additional Providers
 
-- [ ] Implement `VLLMProvider` in `models-providers/src/vllm.rs` (OpenAI-compatible API)
-- [ ] Implement `AnthropicProvider` in `models-providers/src/anthropic.rs`
-- [ ] Implement `LMStudioProvider` (OpenAI-compatible, shares logic with vLLM)
-- [ ] Register all in `ProviderFactory`
+- [x] Implement `VLLMProvider` in `models-providers/src/vllm.rs` (OpenAI-compatible API) ✅ **Done** (2026-02-22)
+- [x] Implement `AnthropicProvider` in `models-providers/src/anthropic.rs` ✅ **Done** (2026-02-22)
+- [x] Implement `LMStudioProvider` (OpenAI-compatible, shares logic with vLLM) ✅ **Done** (2026-02-22)
+- [x] Register all in `ProviderFactory` ✅ **Done** (2026-02-22)
 
 #### 2.2 Additional Benchmarks
 
 - [ ] **Reasoning:** BBH benchmark (`models-benchmark/src/reasoning/bbh.rs`)
 - [ ] **Reasoning:** ARC benchmark (`models-benchmark/src/reasoning/arc.rs`)
-- [ ] **Math:** GSM8K benchmark (`models-benchmark/src/math/gsm8k.rs`)
+- [x] **Math:** GSM8K benchmark (`models-benchmark/src/math/gsm8k.rs`) ✅ **Done** (2026-02-22)
 - [ ] **Math:** MATH benchmark (`models-benchmark/src/math/math.rs`)
-- [ ] **Coding:** HumanEval benchmark (`models-benchmark/src/coding/humaneval.rs`)
+- [x] **Coding:** HumanEval benchmark (`models-benchmark/src/coding/humaneval.rs`) ✅ **Done** (2026-02-22)
 - [ ] **Coding:** MBPP benchmark (`models-benchmark/src/coding/mbpp.rs`)
-- [ ] **Hallucination:** TruthfulQA benchmark (`models-benchmark/src/hallucination/truthfulqa.rs`)
+- [x] **Hallucination:** TruthfulQA benchmark (`models-benchmark/src/hallucination/truthfulqa.rs`) ✅ **Done** (2026-02-22)
 - [ ] **Context:** LongContext benchmark (`models-benchmark/src/context/long_context.rs`)
-- [ ] **Context:** NeedleInHaystack benchmark (`models-benchmark/src/context/needle.rs`)
-- [ ] **Instruction:** AlpacaEval benchmark (`models-benchmark/src/instruction/alpaca_eval.rs`)
-- [ ] **Multi-turn:** MT-Bench benchmark (`models-benchmark/src/multiturn/mt_bench.rs`)
-- [ ] **Safety:** Safety benchmark (`models-benchmark/src/safety/safety.rs`)
+- [x] **Context:** NeedleInHaystack benchmark (`models-benchmark/src/context/needle.rs`) ✅ **Done** (2026-02-22)
+- [x] **Instruction:** AlpacaEval benchmark (`models-benchmark/src/instruction/alpaca_eval.rs`) ✅ **Done** (2026-02-22)
+- [x] **Multi-turn:** MT-Bench benchmark (`models-benchmark/src/multiturn/mt_bench.rs`) ✅ **Done** (2026-02-22)
+- [x] **Safety:** Safety benchmark (`models-benchmark/src/safety/safety.rs`) ✅ **Done** (2026-02-22)
 - [ ] Register all in `BenchmarkRegistry::register_all_builtin()`
 - [ ] Create/download dataset files for each benchmark in `datasets/`
 
 #### 2.3 Additional Metrics
 
-- [ ] BLEU score metric (`models-metrics/src/accuracy.rs`)
-- [ ] ROUGE score metric (ROUGE-1, ROUGE-2, ROUGE-L)
+- [x] BLEU score metric (`models-metrics/src/accuracy.rs`) ✅ **Done** (2026-02-22)
+- [x] ROUGE score metric (ROUGE-1, ROUGE-2, ROUGE-L) ✅ **Done** (2026-02-22)
 - [ ] Hallucination rate metric (`models-metrics/src/hallucination.rs`)
 - [ ] Factual consistency metric
 - [ ] Output drift metric (`models-metrics/src/drift.rs`)
 - [ ] Temperature variance metric
-- [ ] Cost per token metric (`models-metrics/src/efficiency.rs`)
-- [ ] Quality per token metric
-- [ ] Register all in `MetricsEngine::register_all_builtin()`
+- [x] Cost per token metric (`models-metrics/src/efficiency.rs`) ✅ **Done** (2026-02-22)
+- [x] Quality per dollar metric ✅ **Done** (2026-02-22)
+- [x] Register all in `MetricsEngine::register_all_builtin()` ✅ **Done** (2026-02-22)
 
 #### 2.4 Report Generation
 

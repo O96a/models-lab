@@ -21,6 +21,12 @@ pub enum Error {
     #[error("Timeout: {0}")]
     Timeout(String),
 
+    #[error("Storage error: {0}")]
+    Storage(String),
+
+    #[error("Database error: {0}")]
+    Database(String),
+
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 

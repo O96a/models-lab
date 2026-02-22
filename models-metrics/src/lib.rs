@@ -5,13 +5,17 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::Duration;
 
-pub mod speed;
 pub mod accuracy;
+pub mod efficiency;
+pub mod speed;
 
-pub use speed::{TokensPerSecondMetric, FirstTokenLatencyMetric, P95LatencyMetric};
-pub use accuracy::{ExactMatchMetric, F1ScoreMetric};
+pub use accuracy::{BleuMetric, ExactMatchMetric, F1ScoreMetric, RougeMetric, RougeType};
+pub use efficiency::{
+    CostEfficiencyMetric, CostPerTokenMetric, LatencyEfficiencyMetric, QualityPerDollarMetric,
+    TotalCostMetric,
+};
+pub use speed::{FirstTokenLatencyMetric, P95LatencyMetric, TokensPerSecondMetric};
 
 // ============================================================================
 // Core Types
@@ -227,6 +231,17 @@ impl MetricsEngine {
         // Accuracy metrics
         self.register(ExactMatchMetric::new());
         self.register(F1ScoreMetric::new());
+        self.register(BleuMetric::new());
+        self.register(RougeMetric::rouge1());
+        self.register(RougeMetric::rouge2());
+        self.register(RougeMetric::rouge_l());
+
+        // Efficiency metrics
+        self.register(CostPerTokenMetric::new());
+        self.register(TotalCostMetric::new());
+        self.register(QualityPerDollarMetric::new());
+        self.register(LatencyEfficiencyMetric::new());
+        self.register(CostEfficiencyMetric::new());
     }
 
     /// Get a metric by name

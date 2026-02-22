@@ -1,14 +1,9 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! Models Storage - PostgreSQL implementation for evaluation persistence
+//!
+//! This crate provides storage backends for persisting evaluation results,
+//! benchmark data, and model configurations.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod postgres;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use postgres::PostgresStorage;
+pub use models_core::storage::{EvaluationStorage, InMemoryStorage, StoredBenchmarkResult, StoredEvaluationReport, QueryParams};

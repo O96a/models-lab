@@ -7,11 +7,25 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+pub mod coding;
+pub mod context;
+pub mod hallucination;
+pub mod instruction;
+pub mod math;
+pub mod multiturn;
 pub mod registry;
 pub mod reasoning;
+pub mod safety;
 
+pub use coding::humaneval::HumanEvalBenchmark;
+pub use context::needle::NeedleInHaystackBenchmark;
+pub use hallucination::truthfulqa::TruthfulQABenchmark;
+pub use instruction::alpaca_eval::AlpacaEvalBenchmark;
+pub use math::gsm8k::GSM8KBenchmark;
+pub use multiturn::mt_bench::MTBenchBenchmark;
 pub use registry::BenchmarkRegistry;
 pub use reasoning::mmlu::MMLUBenchmark;
+pub use safety::safety::SafetyBenchmark;
 
 // ============================================================================
 // Core Types
