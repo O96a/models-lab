@@ -18,12 +18,17 @@ pub mod reasoning;
 pub mod safety;
 
 pub use coding::humaneval::HumanEvalBenchmark;
+pub use coding::mbpp::MbppBenchmark;
+pub use context::long_context::LongContextBenchmark;
 pub use context::needle::NeedleInHaystackBenchmark;
 pub use hallucination::truthfulqa::TruthfulQABenchmark;
 pub use instruction::alpaca_eval::AlpacaEvalBenchmark;
 pub use math::gsm8k::GSM8KBenchmark;
+pub use math::math::MATHBenchmark;
 pub use multiturn::mt_bench::MTBenchBenchmark;
 pub use registry::BenchmarkRegistry;
+pub use reasoning::arc::{ARCBenchmark, ARCVariant};
+pub use reasoning::bbh::BbhBenchmark;
 pub use reasoning::mmlu::MMLUBenchmark;
 pub use safety::safety::SafetyBenchmark;
 

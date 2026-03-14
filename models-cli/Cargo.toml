@@ -20,7 +20,10 @@ anyhow = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 chrono = { workspace = true }
+uuid = { workspace = true }
 models-core = { workspace = true }
 models-ollama = { workspace = true }
 models-providers = { path = "../models-providers" }
 models-benchmark = { path = "../models-benchmark" }
+webbrowser = "1.0"
+open = "5.0"

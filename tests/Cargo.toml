@@ -1,0 +1,45 @@
+[package]
+name = "models-lab-tests"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Integration tests for Models Lab"
+
+[dependencies]
+tokio = { workspace = true, features = ["full", "test-util"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+async-trait = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+reqwest = { workspace = true }
+futures = { workspace = true }
+
+# Internal crates
+models-core = { path = "../models-core" }
+models-benchmark = { path = "../models-benchmark" }
+models-api = { path = "../models-api" }
+models-providers = { path = "../models-providers" }
+
+[lib]
+name = "models_lab_tests"
+path = "src/lib.rs"
+
+[[test]]
+name = "test_cli"
+path = "src/test_cli_evaluate.rs"
+
+[[test]]
+name = "test_api"
+path = "src/test_api_endpoints.rs"
+
+[[test]]
+name = "test_benchmarks"
+path = "src/test_benchmarks.rs"
+
+[[test]]
+name = "test_reports"
+path = "src/test_reports.rs"

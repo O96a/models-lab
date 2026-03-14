@@ -7,14 +7,18 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub mod accuracy;
+pub mod drift;
 pub mod efficiency;
+pub mod hallucination;
 pub mod speed;
 
 pub use accuracy::{BleuMetric, ExactMatchMetric, F1ScoreMetric, RougeMetric, RougeType};
+pub use drift::{OutputDriftMetric, TemperatureVarianceMetric};
 pub use efficiency::{
     CostEfficiencyMetric, CostPerTokenMetric, LatencyEfficiencyMetric, QualityPerDollarMetric,
     TotalCostMetric,
 };
+pub use hallucination::{FactualConsistencyMetric, HallucinationRateMetric};
 pub use speed::{FirstTokenLatencyMetric, P95LatencyMetric, TokensPerSecondMetric};
 
 // ============================================================================
@@ -242,6 +246,14 @@ impl MetricsEngine {
         self.register(QualityPerDollarMetric::new());
         self.register(LatencyEfficiencyMetric::new());
         self.register(CostEfficiencyMetric::new());
+
+        // Hallucination metrics
+        self.register(HallucinationRateMetric::new());
+        self.register(FactualConsistencyMetric::new());
+
+        // Drift metrics
+        self.register(OutputDriftMetric::new());
+        self.register(TemperatureVarianceMetric::new());
     }
 
     /// Get a metric by name

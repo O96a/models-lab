@@ -6,11 +6,15 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use models_core::{
+    ComparisonConfig, ComparisonReport, ComparisonReportBuilder,
+    ModelBenchmarkResult, ModelCategoryScore, ModelComparisonResult, ModelConfig,
+    BenchmarkWinner, StatisticalTest, WinnerInfo,
     Config, EvaluationStorage,
     InMemoryStorage, ModelProvider,
 };
 use models_ollama::{ChatRequest, EmbeddingRequest, OllamaClient};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 /// Application state
@@ -351,5 +355,198 @@ impl EvaluationHandler {
             Ok(results) => Json(results).into_response(),
             Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({ "error": e.to_string() }))).into_response(),
         }
+    }
+}
+
+// ============================================================================
+// Comparison Handler
+// ============================================================================
+
+/// Comparison handler
+pub struct ComparisonHandler;
+
+#[derive(Debug, Deserialize)]
+pub struct CompareRequest {
+    /// Models to compare with their configurations
+    pub models: Vec<ModelConfigDto>,
+    /// Benchmarks to run
+    pub benchmarks: Vec<String>,
+    /// Maximum samples per benchmark
+    pub max_samples: Option<usize>,
+    /// Temperature for generation
+    pub temperature: Option<f64>,
+    /// Maximum tokens to generate
+    pub max_tokens: Option<u32>,
+    /// Number of few-shot examples
+    pub num_few_shot: Option<usize>,
+    /// Confidence level for statistical tests (e.g., 0.95)
+    pub confidence_level: Option<f64>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ModelConfigDto {
+    /// Provider name (ollama, openai)
+    pub provider: String,
+    /// Model name
+    pub model: String,
+}
+
+impl ComparisonHandler {
+    /// Run a comparison between multiple models
+    pub async fn compare(
+        State(state): State<Arc<AppState>>,
+        Json(request): Json<CompareRequest>,
+    ) -> impl IntoResponse {
+        if request.models.len() < 2 {
+            return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
+                "error": "At least 2 models are required for comparison"
+            }))).into_response();
+        }
+
+        if request.benchmarks.is_empty() {
+            return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
+                "error": "At least one benchmark must be specified"
+            }))).into_response();
+        }
+
+        let config = ComparisonConfig {
+            models: request.models.iter().map(|m| ModelConfig {
+                provider: m.provider.clone(),
+                model: m.model.clone(),
+                base_url: None,
+                api_key: None,
+            }).collect(),
+            benchmarks: request.benchmarks.clone(),
+            max_samples: request.max_samples,
+            temperature: request.temperature.unwrap_or(0.0),
+            max_tokens: request.max_tokens.unwrap_or(1024),
+            num_few_shot: request.num_few_shot.unwrap_or(5),
+            confidence_level: request.confidence_level.unwrap_or(0.95),
+        };
+
+        let mut report_builder = ComparisonReportBuilder::new(config);
+
+        // Run evaluation for each model
+        for model_config in &request.models {
+            tracing::info!("Evaluating model: {}", model_config.model);
+
+            // Create provider
+            let provider_result = match model_config.provider.as_str() {
+                "ollama" => {
+                    models_providers::create_ollama_provider(
+                        Some(&state.config.ollama.base_url),
+                        Some(&model_config.model),
+                        None,
+                    )
+                }
+                _ => {
+                    return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
+                        "error": format!("Unknown provider: {}", model_config.provider)
+                    }))).into_response();
+                }
+            };
+
+            let provider = match provider_result {
+                Ok(p) => p,
+                Err(e) => {
+                    tracing::error!("Failed to create provider for {}: {}", model_config.model, e);
+                    continue;
+                }
+            };
+
+            // Run benchmarks
+            let mut benchmark_results = Vec::new();
+            let mut category_scores_map: HashMap<String, Vec<(String, f64)>> = HashMap::new();
+            let mut total_samples = 0usize;
+            let mut total_latency = 0.0;
+
+            for benchmark_id in &request.benchmarks {
+                if let Some(benchmark) = state.benchmark_registry.get(benchmark_id) {
+                    let bench_config = models_benchmark::BenchmarkConfig {
+                        max_samples: request.max_samples,
+                        temperature: request.temperature.unwrap_or(0.0),
+                        max_tokens: request.max_tokens.unwrap_or(1024),
+                        num_few_shot: request.num_few_shot.unwrap_or(5),
+                        ..Default::default()
+                    };
+
+                    match benchmark.run(&provider, bench_config).await {
+                        Ok(result) => {
+                            let category = format!("{:?}", benchmark.category()).to_lowercase();
+
+                            benchmark_results.push(ModelBenchmarkResult {
+                                benchmark_id: result.benchmark_id.clone(),
+                                benchmark_name: result.benchmark_name.clone(),
+                                category: category.clone(),
+                                accuracy: result.statistics.accuracy,
+                                sample_count: result.statistics.total_samples,
+                                mean_latency_ms: result.statistics.mean_latency_ms,
+                                std_dev: None,
+                            });
+
+                            // Track category scores
+                            category_scores_map
+                                .entry(category)
+                                .or_default()
+                                .push((result.benchmark_id.clone(), result.statistics.accuracy));
+
+                            total_samples += result.statistics.total_samples;
+                            total_latency += result.statistics.mean_latency_ms;
+                        }
+                        Err(e) => {
+                            tracing::error!("Benchmark {} failed for model {}: {}", benchmark_id, model_config.model, e);
+                        }
+                    }
+                }
+            }
+
+            // Calculate category scores
+            let category_scores: Vec<ModelCategoryScore> = category_scores_map
+                .iter()
+                .map(|(category, scores)| {
+                    let avg_score = scores.iter().map(|(_, s)| s).sum::<f64>() / scores.len() as f64;
+                    let benchmark_scores: HashMap<String, f64> = scores.iter().cloned().collect();
+
+                    ModelCategoryScore {
+                        category: category.clone(),
+                        score: avg_score,
+                        benchmark_count: scores.len(),
+                        benchmark_scores,
+                    }
+                })
+                .collect();
+
+            // Calculate overall score
+            let overall_score = if !benchmark_results.is_empty() {
+                benchmark_results.iter().map(|r| r.accuracy).sum::<f64>() / benchmark_results.len() as f64
+            } else {
+                0.0
+            };
+
+            let avg_latency = if !benchmark_results.is_empty() {
+                total_latency / benchmark_results.len() as f64
+            } else {
+                0.0
+            };
+
+            // Create model comparison result
+            let model_result = ModelComparisonResult {
+                model_name: model_config.model.clone(),
+                provider_name: model_config.provider.clone(),
+                overall_score,
+                category_scores,
+                benchmark_results,
+                rank: 0, // Will be calculated by report
+                total_samples,
+                avg_latency_ms: avg_latency,
+            };
+
+            report_builder = report_builder.add_result(model_result);
+        }
+
+        // Build final report
+        let report = report_builder.build();
+
+        Json(report).into_response()
     }
 }

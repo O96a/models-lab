@@ -8,7 +8,7 @@ use std::sync::Arc;
 use tower_http::cors::CorsLayer;
 
 use crate::handlers::{
-    AppState, ModelsHandler, InferenceHandler, HealthHandler, EvaluationHandler,
+    AppState, ModelsHandler, InferenceHandler, HealthHandler, EvaluationHandler, ComparisonHandler,
 };
 
 pub fn create_router(state: Arc<AppState>) -> Router {
@@ -28,6 +28,8 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         .route("/api/v1/benchmarks", get(EvaluationHandler::list_benchmarks))
         .route("/api/v1/reports", get(EvaluationHandler::list_reports))
         .route("/api/v1/results", get(EvaluationHandler::list_results))
+        // Comparison
+        .route("/api/v1/compare", post(ComparisonHandler::compare))
         .layer(CorsLayer::permissive())
         .with_state(state)
 }

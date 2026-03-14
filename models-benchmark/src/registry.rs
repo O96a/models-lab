@@ -33,6 +33,15 @@ impl BenchmarkRegistry {
     /// Register all built-in benchmarks
     pub fn register_all_builtin(&mut self) {
         self.register(crate::reasoning::mmlu::MMLUBenchmark::new());
+        self.register(crate::reasoning::arc::ARCBenchmark::easy());
+        self.register(crate::reasoning::arc::ARCBenchmark::challenge());
+        self.register(crate::reasoning::bbh::BbhBenchmark::new());
+        self.register(crate::context::long_context::LongContextBenchmark::new());
+        self.register(crate::context::needle::NeedleInHaystackBenchmark::new());
+        self.register(crate::coding::humaneval::HumanEvalBenchmark::new());
+        self.register(crate::coding::mbpp::MbppBenchmark::new());
+        self.register(crate::math::gsm8k::GSM8KBenchmark::new());
+        self.register(crate::math::math::MATHBenchmark::new());
     }
 
     /// Get a benchmark by ID
@@ -90,6 +99,20 @@ mod tests {
     fn test_builtin_registry() {
         let registry = BenchmarkRegistry::with_builtin();
         assert!(registry.contains("mmlu"));
+        assert!(registry.contains("bbh"));
+        assert!(registry.contains("arc-easy"));
+        assert!(registry.contains("arc-challenge"));
+        assert!(registry.contains("long_context"));
+        assert!(registry.contains("needle_in_haystack"));
+        assert!(registry.contains("mbpp"), "MBPP benchmark should be registered");
+        assert!(registry.contains("humaneval"), "HumanEval benchmark should be registered");
+        assert!(registry.contains("gsm8k"));
+        assert!(registry.contains("math"));
         assert!(!registry.is_empty());
+
+        // Verify MBPP has correct category
+        let mbpp = registry.get("mbpp").expect("MBPP should exist");
+        assert_eq!(mbpp.category(), BenchmarkCategory::Coding);
+        assert_eq!(mbpp.name(), "MBPP");
     }
 }
